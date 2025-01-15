@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Texagon Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+  <div class="chat-card">
+    <div class="chat-header">
+      <div class="h2">Texagon Assistant<span class="beta-label">Beta</span></div>
+    </div>
+    <div class="chat-body" id="transcriptions"></div>
+    <div class="chat-footer">
+      <form id="questionForm">
+        <input type="text" id="question" name="question" placeholder="Ask a question (e.g., What, Why, Who, How, When, Where, Tell, Explain)" required>
+        <button type="submit">Submit</button>
+        <div id="micContainer">
+          <button type="button" id="micButton"><i class="fas fa-microphone"></i></button>
+          <span id="listeningText" style="display: none;">Listening...</span>
+          <span id="tapToRecordText">Tap to record</span>
+        </div>
+      </form>
+      <button id="continuousListeningButton">Enable Continuous Listening</button>
+      <button id="muteButton">Mute</button>
+      <button id="cancelButton" style="display: none;"><i class="fas fa-stop"></i> Stop</button>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+body {
+  font-family: 'Orbitron', sans-serif;
+  background-color: #0d0d0d;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center items horizontally */
+  justify-content: center; /* Center items vertically */
+  height: 100vh;
+}
+
+.chat-card {
+  width: 100%;
+  max-width: 100%;
+  background-color: #fff;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-header {
+  padding: 20px;
+  background-color: #f2f2f2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Adjust alignment */
+}
+
+.chat-header .h2 {
+  font-size: 24px;
+  color: #333;
+}
+
+.chat-body {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  position: relative; /* Add relative positioning */
+}
+
+.message {
+  margin-bottom: 10px;
+  padding: 10px;
+  max-width: 60%;
+  font-family: 'Roboto', sans-serif; /* Update font for chat messages */
+  position: relative;
+}
+
+.incoming {
+  background-color: #e1e1e1;
+  align-self: flex-start;
+  color: #000;
+  margin-left: 0; /* Align incoming messages to the left */
+  border-radius: 10px 10px 10px 0; /* Rounded edges with one sharp edge */
+}
+
+.outgoing {
+  background-color: #4285f4;
+  align-self: flex-end;
+  color: #fff;
+  text-align: right;
+  margin-right: 0; /* Align outgoing messages to the right */
+  border-radius: 10px 10px 0 10px; /* Rounded edges with one sharp edge */
+}
+
+.message p {
+  font-size: 18px; /* Increase font size */
+  margin: 0;
+}
+
+.chat-footer {
+  padding: 20px;
+  background-color: #f2f2f2;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center items horizontally */
+}
+
+.chat-footer form {
+  display: flex;
+  width: 100%;
+  max-width: 800px; /* Limit the width of the form */
+}
+
+.chat-footer input[type="text"] {
+  flex: 1;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 20px 0 0 20px;
+  outline: none;
+  max-width: 80%;
+}
+
+.chat-footer button {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  background-color: #4285f4;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 0 20px 20px 0;
+}
+
+.chat-footer button:hover {
+  background-color: #357ae8;
+}
+
+/* Add specific styles for the mic button */
+#micContainer {
+  display: flex;
+  align-items: center;
+}
+
+#micButton {
+  background-color: transparent;
+  color: #4285f4;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+#micButton:hover {
+  background-color: #e1e1e1;
+}
+
+/* Add specific styles for the cancel button */
+#cancelButton {
+  background-color: transparent;
+  color: #ff0000;
+  border: none;
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+#cancelButton:hover {
+  background-color: #e1e1e1;
+}
+
+/* Add specific styles for the continuous listening button */
+#continuousListeningButton {
+  background-color: #4285f4;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 10px;
+  margin-left: 10px;
+}
+
+#continuousListeningButton:hover {
+  background-color: #357ae8;
+}
+
+#continuousListeningButton.danger {
+  background-color: #ff0000;
+}
+
+#continuousListeningButton.danger:hover {
+  background-color: #cc0000;
+}
+
+/* Add specific styles for the mute button */
+#muteButton {
+  background-color: #ffcc00;
+  color: #000;
+  border: none;
+  cursor: pointer;
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 10px;
+  margin-left: 10px;
+}
+
+#muteButton:hover {
+  background-color: #e6b800;
+}
+
+@keyframes chatAnimation {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-card .message {
+  animation: chatAnimation 0.3s ease-in-out;
+  animation-fill-mode: both;
+  animation-delay: 0.1s;
+}
+
+.chat-card .message:nth-child(even) {
+  animation-delay: 0.2s;
+}
+
+.chat-card .message:nth-child(odd) {
+  animation-delay: 0.3s;
+}
+
+@media (max-width: 768px) {
+  .chat-header .h2 {
+    font-size: 20px;
+  }
+
+  .chat-footer input[type="text"] {
+    font-size: 12px;
+  }
+
+  .chat-footer button {
+    font-size: 12px;
+  }
+
+  .message p {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-header .h2 {
+    font-size: 18px;
+  }
+
+  .chat-footer input[type="text"] {
+    font-size: 10px;
+  }
+
+  .chat-footer button {
+    font-size: 10px;
+  }
+
+  .message p {
+    font-size: 14px;
+  }
+}
+
+.beta-label {
+  display: inline-block;
+  background-color: #ffcc00;
+  color: #000;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 0.8em;
+  margin-left: 8px;
+  vertical-align: middle;
+}
