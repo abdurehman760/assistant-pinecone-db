@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function createMessageElement(content, isOutgoing = false) {
+  function createMessageElement(content, isOutgoing = false, timeTaken = null) {
     const message = document.createElement('div');
     message.classList.add('message', isOutgoing ? 'outgoing' : 'incoming');
     
@@ -37,7 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const timestamp = document.createElement('span');
     timestamp.classList.add('timestamp');
-    timestamp.textContent = formatTime(new Date());
+    const timeInfo = timeTaken ? ` (${(timeTaken/1000).toFixed(2)}s)` : '';
+    timestamp.textContent = `${formatTime(new Date())}${timeInfo}`;
     
     message.innerHTML = `<p>${content}</p>`;
     message.appendChild(timestamp);
@@ -70,12 +71,17 @@ document.addEventListener('DOMContentLoaded', () => {
     event.preventDefault();
     resetAudio(); // Reset audio state for new request
     
-    const startTime = Date.now();
+    console.time('Total Response Time');
+    const startTime = performance.now();
+    
     const questionInput = document.getElementById('question');
     const question = questionInput.value;
 
+    console.log('Processing request started at:', new Date().toISOString());
+    
+    console.time('UI Setup Time');
     const setupStartTime = Date.now();
-    const userMessage = createMessageElement(question, true);
+    const userMessage = createMessageElement(question, true, 0);
     appendMessage(userMessage);
 
     const aiMessage = document.createElement('div');
@@ -85,7 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add timestamp to AI message
     const timestamp = document.createElement('span');
     timestamp.classList.add('timestamp');
-    timestamp.textContent = formatTime(new Date());
     aiMessage.appendChild(timestamp);
     
     // Create container for generating text and loader
@@ -104,11 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
     aiMessage.appendChild(aiMessageContent);
     appendMessage(aiMessage);
 
+    console.timeEnd('UI Setup Time');
     console.log(`Setup time: ${Date.now() - setupStartTime}ms - Setup user and AI message elements`);
 
+    console.time('Server Response Time');
     const responseStartTime = Date.now();
     const eventSource = new EventSource(`/pdf-loader/retrieve-data?query=${encodeURIComponent(question)}`);
 
+    let firstChunkTime = null;
     let isFirstChunk = true;
 
     async function playNextChunk() {
@@ -160,6 +168,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     eventSource.onmessage = (event) => {
+      if (isFirstChunk) {
+        firstChunkTime = performance.now();
+        console.log(`Time to first chunk: ${((firstChunkTime - startTime)/1000).toFixed(2)}s`);
+        const responseTimeSeconds = ((firstChunkTime - startTime)/1000).toFixed(2);
+        timestamp.textContent = `${formatTime(new Date())} (${responseTimeSeconds}s)`;
+        aiMessageContent.innerHTML = ''; // Clear the generating container
+        isFirstChunk = false;
+      }
+
       const data = JSON.parse(event.data);
       if (data.type === 'text') {
         if (isFirstChunk) {
@@ -183,10 +200,14 @@ document.addEventListener('DOMContentLoaded', () => {
     eventSource.onerror = () => {
       eventSource.close();
       isPlaying = false; // Reset playing state on error
+      const endTime = performance.now();
+      console.timeEnd('Server Response Time');
+      console.log(`Total processing time: ${endTime - startTime}ms`);
+      console.timeEnd('Total Response Time');
     };
 
     eventSource.onopen = () => {
-      console.log(`Response time: ${Date.now() - responseStartTime}ms - Fetch response from server`);
+      console.log(`Connection established in: ${performance.now() - startTime}ms`);
     };
 
     questionInput.value = '';
