@@ -276,8 +276,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function enableContinuousListening() {
     recognition.continuous = true;
-    // Only show icon on mobile
-    continuousListeningButton.innerHTML = '<i class="fas fa-stop"></i>';
+    continuousListeningButton.innerHTML = window.innerWidth <= 768 ? 
+      '<i class="fas fa-stop"></i>' : 
+      '<i class="fas fa-stop"></i><span>Stop Listening</span>';
     continuousListeningButton.classList.add('danger');
     micButton.style.display = 'none';
     startListening();
@@ -285,12 +286,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function disableContinuousListening() {
     recognition.continuous = false;
-    // Only show icon on mobile
-    continuousListeningButton.innerHTML = '<i class="fas fa-headset"></i>';
+    continuousListeningButton.innerHTML = window.innerWidth <= 768 ? 
+      '<i class="fas fa-headset"></i>' : 
+      '<i class="fas fa-headset"></i><span>Auto Listen</span>';
     continuousListeningButton.classList.remove('danger');
     micButton.style.display = 'flex';
     stopListening();
   }
+
+  // Add window resize handler to update button text
+  window.addEventListener('resize', () => {
+    if (isContinuousListening) {
+      enableContinuousListening();
+    } else {
+      disableContinuousListening();
+    }
+  });
 
   // Add cleanup when leaving the page
   window.addEventListener('beforeunload', () => {

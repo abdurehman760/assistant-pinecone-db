@@ -370,6 +370,10 @@ body.dark-mode {
   font-size: 1.1em; /* Make icon slightly larger */
 }
 
+#continuousListeningButton span {
+  display: inline; /* Ensure text is visible by default */
+}
+
 #continuousListeningButton:hover {
   border-color: var(--color-primary);  /* Match mic button hover state */
   background-color: transparent;
@@ -491,7 +495,7 @@ body.dark-mode {
   }
 
   #continuousListeningButton span {
-    display: none !important;
+    display: none !important; /* Hide text only on mobile */
   }
 
   .chat-footer input[type="text"] {
