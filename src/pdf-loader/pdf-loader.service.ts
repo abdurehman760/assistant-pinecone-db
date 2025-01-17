@@ -10,28 +10,36 @@ dotenv.config();
 export class PdfLoaderService {
   constructor(private readonly vectorStoreService: VectorStoreService) {}
 
-  async getChunkedDocsFromPDF() {
+  async getChunkedDocsFromPDF(filePath: string) {
     try {
-      const loader = new PDFLoader(process.env.PDF_PATH);
+      const loader = new PDFLoader(filePath);
       const docs = await loader.load();
 
       const textSplitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 300,
+        chunkSize: 200,
         chunkOverlap: 20,
         separators: ["\n\n", "\n", " ", ""], // Defines splitting hierarchy
       });
 
       const chunkedDocs = await textSplitter.splitDocuments(docs);
 
-      return chunkedDocs;
+      // Remove metadata from chunked documents
+      const chunkedDocsWithoutMetadata = chunkedDocs.map(doc => ({
+        pageContent: doc.pageContent,
+      }));
+
+      console.log(chunkedDocsWithoutMetadata);
+
+      return chunkedDocsWithoutMetadata;
     } catch (e) {
       console.error(e);
       throw new Error("PDF docs chunking failed !");
     }
   }
 
-  async loadAndStorePDF() {
-    const chunkedDocs = await this.getChunkedDocsFromPDF();
+  async loadAndStorePDF(filePath?: string) {
+    const path = filePath || process.env.PDF_PATH;
+    const chunkedDocs = await this.getChunkedDocsFromPDF(path);
     await this.vectorStoreService.pushEmbeddingsToPinecone(chunkedDocs);
   }
 }

@@ -1,298 +1,96 @@
-## Plan to Build a Code in NestJS using LangChain with Pinecone as Vector DB
+# Plan to Use OpenAI Text-to-Speech API
 
-1. **Setup Environment:**
-   - Install necessary packages:
-     ```bash
-     npm install @nestjs/core @nestjs/common @nestjs/cli langchain dotenv @langchain/community @langchain/core pdf-parse @langchain/openai @langchain/pinecone @pinecone-database/pinecone
-     ```
-   - Create a `.env` file to store your API keys and other environment variables:
-     ```
-     OPENAI_API_KEY=your-api-key
-     PINECONE_API_KEY=your-pinecone-api-key
-     PINECONE_INDEX=your-pinecone-index
-     PINECONE_ENVIRONMENT=your-pinecone-environment
-     PDF_PATH=E:/Texagon/new_assistant/src/documents/budget_speech.pdf
-     ```
-     - You can find the `PINECONE_ENVIRONMENT` in your Pinecone dashboard under the "API Keys" section.
+## Overview
 
-2. **Project Structure:**
-   - Organize your project files as follows:
-     ```
-     project-root/
-     ├── src/
-     │   ├── documents/
-     │   │   └── budget_speech.pdf
-     │   ├── langchain/
-     │   │   ├── langchain.module.ts
-     │   │   ├── langchain.service.ts
-     │   │   └── langchain.controller.ts
-     │   ├── pdf-loader/
-     │   │   ├── pdf-loader.module.ts
-     │   │   ├── pdf-loader.service.ts
-     │   ├── pinecone-client/
-     │   │   ├── pinecone-client.module.ts
-     │   │   ├── pinecone-client.service.ts
-     │   ├── vector-store/
-     │   │   ├── vector-store.module.ts
-     │   │   ├── vector-store.service.ts
-     │   ├── app.module.ts
-     ├── .env
-     ├── package.json
-     ├── nest-cli.json
-     ├── config.ts
-     ├── utils.ts
-     └── README.md
-     ```
+Learn how to turn text into lifelike spoken audio using OpenAI's Text-to-Speech (TTS) API.
 
-3. **Create LangChain Module:**
-   - Use Nest CLI to generate the LangChain module, service, and controller.
-   - Open VS Code terminal and run the following commands:
-     ```bash
-     nest generate module langchain
-     nest generate service langchain
-     nest generate controller langchain
-     ```
+## Steps
 
-4. **Create PDF Loader Module:**
-   - Use Nest CLI to generate the PDF Loader module and service.
-   - Open VS Code terminal and run the following commands:
-     ```bash
-     nest generate module pdf-loader
-     nest generate service pdf-loader
-     ```
+1. **Setup OpenAI API Client**
+   - Install the OpenAI client library for your preferred programming language.
+   - Obtain your OpenAI API key.
 
-   - **Purpose:** Load PDF documents and split them into chunks.
-   - Example:
-     ```typescript
-     // src/pdf-loader/pdf-loader.module.ts
-     import { Module } from '@nestjs/common';
-     import { PdfLoaderService } from './pdf-loader.service';
+2. **Generate Spoken Audio**
+   - Use the `speech` endpoint to convert text to audio.
+   - Choose the appropriate model and voice for your needs.
+   - Example code snippets for JavaScript, Python, and cURL are provided in the OpenAI documentation.
 
-     @Module({
-       providers: [PdfLoaderService],
-       exports: [PdfLoaderService],
-     })
-     export class PdfLoaderModule {}
-     ```
+3. **Save the Audio File**
+   - Save the generated audio to a file (e.g., `speech.mp3`).
+   - Ensure the file is saved in the desired format (e.g., MP3, AAC, FLAC).
 
-     ```typescript
-     // src/pdf-loader/pdf-loader.service.ts
-     import { Injectable } from '@nestjs/common';
-     import { PDFLoader } from "langchain/document_loaders/fs/pdf";
-     import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-     import { env } from "../config";
+4. **Experiment with Different Voices**
+   - Test different voices like `alloy`, `ash`, `coral`, etc., to find the best match for your application.
 
-     @Injectable()
-     export class PdfLoaderService {
-       async getChunkedDocsFromPDF() {
-         try {
-           const loader = new PDFLoader(env.PDF_PATH);
-           const docs = await loader.load();
+5. **Real-Time Audio Streaming**
+   - Implement real-time audio streaming if needed using chunk transfer encoding.
 
-           const textSplitter = new RecursiveCharacterTextSplitter({
-             chunkSize: 1000,
-             chunkOverlap: 200,
-           });
+6. **Supported Languages**
+   - Generate spoken audio in various languages supported by the TTS model.
 
-           const chunkedDocs = await textSplitter.splitDocuments(docs);
+7. **Compliance with Usage Policies**
+   - Ensure clear disclosure to end users that the TTS voice is AI-generated.
 
-           return chunkedDocs;
-         } catch (e) {
-           console.error(e);
-           throw new Error("PDF docs chunking failed !");
-         }
-       }
-     }
-     ```
+## Example Code
 
-5. **Create Pinecone Client Module:**
-   - Use Nest CLI to generate the Pinecone Client module and service.
-   - Open VS Code terminal and run the following commands:
-     ```bash
-     nest generate module pinecone-client
-     nest generate service pinecone-client
-     ```
+### JavaScript
 
-   - **Purpose:** Initialize and manage the Pinecone client.
-   - Example:
-     ```typescript
-     // src/pinecone-client/pinecone-client.module.ts
-     import { Module } from '@nestjs/common';
-     import { PineconeClientService } from './pinecone-client.service';
+```javascript
+import fs from "fs";
+import path from "path";
+import OpenAI from "openai";
 
-     @Module({
-       providers: [PineconeClientService],
-       exports: [PineconeClientService],
-     })
-     export class PineconeClientModule {}
-     ```
+const openai = new OpenAI();
+const speechFile = path.resolve("./speech.mp3");
 
-     ```typescript
-     // src/pinecone-client/pinecone-client.service.ts
-     import { Injectable } from '@nestjs/common';
-     import { PineconeClient } from "@pinecone-database/pinecone";
-     import { env } from "../config";
-     import { delay } from "../utils";
+const mp3 = await openai.audio.speech.create({
+  model: "tts-1",
+  voice: "alloy",
+  input: "Today is a wonderful day to build something people love!",
+});
 
-     let pineconeClientInstance: PineconeClient | null = null;
+const buffer = Buffer.from(await mp3.arrayBuffer());
+await fs.promises.writeFile(speechFile, buffer);
+```
 
-     @Injectable()
-     export class PineconeClientService {
-       async createIndex(client: PineconeClient, indexName: string) {
-         try {
-           await client.createIndex({
-             createRequest: {
-               name: indexName,
-               dimension: 1536,
-               metric: "cosine",
-             },
-           });
-           console.log(
-             `Waiting for ${env.INDEX_INIT_TIMEOUT} seconds for index initialization to complete...`
-           );
-           await delay(env.INDEX_INIT_TIMEOUT);
-           console.log("Index created !!");
-         } catch (error) {
-           console.error("error ", error);
-           throw new Error("Index creation failed");
-         }
-       }
+### Python
 
-       async initPineconeClient() {
-         try {
-           const pineconeClient = new PineconeClient();
-           await pineconeClient.init({
-             apiKey: env.PINECONE_API_KEY,
-             environment: env.PINECONE_ENVIRONMENT,
-           });
-           const indexName = env.PINECONE_INDEX_NAME;
+```python
+from pathlib import Path
+from openai import OpenAI
 
-           const existingIndexes = await pineconeClient.listIndexes();
+client = OpenAI()
+speech_file_path = Path(__file__).parent / "speech.mp3"
+response = client.audio.speech.create(
+    model="tts-1",
+    voice="alloy",
+    input="Today is a wonderful day to build something people love!",
+)
+response.stream_to_file(speech_file_path)
+```
 
-           if (!existingIndexes.includes(indexName)) {
-             await this.createIndex(pineconeClient, indexName);
-           } else {
-             console.log("Your index already exists. nice !!");
-           }
+### cURL
 
-           return pineconeClient;
-         } catch (error) {
-           console.error("error", error);
-           throw new Error("Failed to initialize Pinecone Client");
-         }
-       }
+```bash
+curl https://api.openai.com/v1/audio/speech \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "tts-1",
+    "input": "Today is a wonderful day to build something people love!",
+    "voice": "alloy"
+  }' \
+  --output speech.mp3
+```
 
-       async getPineconeClient() {
-         if (!pineconeClientInstance) {
-           pineconeClientInstance = await this.initPineconeClient();
-         }
+## Additional Information
 
-         return pineconeClientInstance;
-       }
-     }
-     ```
+- **Audio Quality**: Use `tts-1-hd` for higher quality audio.
+- **Supported Formats**: MP3, Opus, AAC, FLAC, WAV, PCM.
+- **Supported Languages**: Refer to the Whisper model's language support.
 
-     ```typescript
-     // src/utils.ts
-     export function delay(ms: number) {
-       return new Promise(resolve => setTimeout(resolve, ms));
-     }
-     ```
+## FAQ
 
-     ```typescript
-     // src/config.ts
-     export const env = {
-       PDF_PATH: process.env.PDF_PATH,
-       PINECONE_API_KEY: process.env.PINECONE_API_KEY,
-       PINECONE_ENVIRONMENT: process.env.PINECONE_ENVIRONMENT,
-       PINECONE_INDEX_NAME: process.env.PINECONE_INDEX_NAME,
-       INDEX_INIT_TIMEOUT: parseInt(process.env.INDEX_INIT_TIMEOUT, 10) || 60,
-     };
-     ```
-
-6. **Create Vector Store Module:**
-   - Use Nest CLI to generate the Vector Store module and service.
-   - Open VS Code terminal and run the following commands:
-     ```bash
-     nest generate module vector-store
-     nest generate service vector-store
-     ```
-
-   - **Purpose:** Manage the vector store using Pinecone.
-   - Example:
-     ```typescript
-     // src/vector-store/vector-store.module.ts
-     import { Module } from '@nestjs/common';
-     import { VectorStoreService } from './vector-store.service';
-
-     @Module({
-       providers: [VectorStoreService],
-       exports: [VectorStoreService],
-     })
-     export class VectorStoreModule {}
-     ```
-
-     ```typescript
-     // src/vector-store/vector-store.service.ts
-     import { Injectable } from '@nestjs/common';
-     import { PineconeClient } from "@pinecone-database/pinecone";
-     import { env } from "../config";
-     import { delay } from "../utils";
-
-     let pineconeClientInstance: PineconeClient | null = null;
-
-     @Injectable()
-     export class VectorStoreService {
-       async createIndex(client: PineconeClient, indexName: string) {
-         try {
-           await client.createIndex({
-             createRequest: {
-               name: indexName,
-               dimension: 1536,
-               metric: "cosine",
-             },
-           });
-           console.log(
-             `Waiting for ${env.INDEX_INIT_TIMEOUT} seconds for index initialization to complete...`
-           );
-           await delay(env.INDEX_INIT_TIMEOUT);
-           console.log("Index created !!");
-         } catch (error) {
-           console.error("error ", error);
-           throw new Error("Index creation failed");
-         }
-       }
-
-       async initPineconeClient() {
-         try {
-           const pineconeClient = new PineconeClient();
-           await pineconeClient.init({
-             apiKey: env.PINECONE_API_KEY,
-             environment: env.PINECONE_ENVIRONMENT,
-           });
-           const indexName = env.PINECONE_INDEX_NAME;
-
-           const existingIndexes = await pineconeClient.listIndexes();
-
-           if (!existingIndexes.includes(indexName)) {
-             await this.createIndex(pineconeClient, indexName);
-           } else {
-             console.log("Your index already exists. nice !!");
-           }
-
-           return pineconeClient;
-         } catch (error) {
-           console.error("error", error);
-           throw new Error("Failed to initialize Pinecone Client");
-         }
-       }
-
-       async getPineconeClient() {
-         if (!pineconeClientInstance) {
-           pineconeClientInstance = await this.initPineconeClient();
-         }
-
-         return pineconeClientInstance;
-       }
-     }
-     ```
+- **Emotional Range**: No direct control over emotional output.
+- **Custom Voices**: Not supported.
+- **Ownership**: You own the outputted audio files.
